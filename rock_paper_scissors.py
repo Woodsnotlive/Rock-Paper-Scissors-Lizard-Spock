@@ -1,67 +1,97 @@
 import random
 
-debug = True
+# simple text-based Rock-Paper-Scissors-Lizard-Spock game
+# adds replay logic after each round and on invalid input
 
-print('================================')
-print('Rock Paper Sissors Lizard Spock')
-print('================================')
-print('')
+debug = False  # set to True to show player and cpu choices before results
 
-player = 0
-cpu = 0
+SYMBOLS = {
+    1: '✊',
+    2: '✋',
+    3: '✌️',
+    4: '🦎',
+    5: '🖖',
+}
 
-print('1) ✊')
-print('2) ✋')
-print('3) ✌️')
-print('4) 🦎')
-print('5) 🖖')
-
-player = int(input('Pick a number: '))
-cpu = random.randint(1, 5)
-print('')
-
-if debug == True:
-    print(player)
-    print(cpu)4
-
-if cpu == player:
-    print('Its a draw!')
-
-if cpu == 1 and player != 3 and player != 4:
-    print('You win!')
-elif cpu == 2 and player != 3 and player != 4:
-    print('You win!')
-elif cpu == 3 and player != 1 and player != 5:
-    print('You win!')
-elif cpu == 4 and player != 1 and player != 3:
-    print('You win!')
-elif cpu == 5 and player == 4 and player == 2:
-    print('You win!')
-else:
-    print('You lose')
-
-if player == 1:
-    player = '✊'
-elif player == 2:
-    player = '✋'
-elif player == 3:
-    player = '✌️'
-elif player == 4:
-    player = '🦎'
-elif player == 5:
-    player = '🖖'
-
-if cpu == 1:
-    cpu = '✊'
-elif cpu == 2:
-    cpu = '✋'
-elif cpu == 3:
-    cpu = '✌️'
-elif cpu == 4:
-    cpu = '🦎'
-elif cpu == 5:
-    cpu = '🖖'
+# winning relationships: key beats all in the associated list
+WINNING_MAP = {
+    1: [3, 4],  # rock beats scissors & lizard
+    2: [1, 5],  # paper beats rock & spock
+    3: [2, 4],  # scissors beats paper & lizard
+    4: [2, 5],  # lizard beats paper & spock
+    5: [1, 3],  # spock beats rock & scissors
+}
 
 
-print('You chose: ' + player)
-print('Cpu chose: ' + cpu)
+def prompt_play_again(message="Play again? (y/n): "):
+    resp = input(message).strip().lower()
+    return resp == 'y'
+
+
+def get_player_choice():
+    """Prompt the player for a choice and handle invalid input.
+
+    Returns an integer between 1 and 5, or None if the user elects
+    not to continue after an invalid attempt.
+    """
+    while True:
+        try:
+            choice = int(input('Pick a number: '))
+        except ValueError:
+            print('Invalid input, that is not a number.')
+            if not prompt_play_again('Try again? (y/n): '):
+                return None
+            continue
+
+        if 1 <= choice <= 5:
+            return choice
+        else:
+            print('Invalid input, number must be 1–5.')
+            if not prompt_play_again('Try again? (y/n): '):
+                return None
+
+
+def determine_result(player, cpu):
+    if cpu == player:
+        return "It's a draw!"
+    if cpu in WINNING_MAP.get(player, []):
+        return 'You win!'
+    return 'You lose'
+
+
+def show_menu():
+    print('1) ✊')
+    print('2) ✋')
+    print('3) ✌️')
+    print('4) 🦎')
+    print('5) 🖖')
+
+
+def main():
+    print('================================')
+    print('Rock Paper Sissors Lizard Spock')
+    print('================================\n')
+
+    while True:
+        show_menu()
+        player = get_player_choice()
+        if player is None:
+            break
+
+        cpu = random.randint(1, 5)
+        print('')
+
+        if debug:
+            print('DEBUG:', player, cpu)
+
+        print(determine_result(player, cpu))
+        print('You chose:', SYMBOLS[player])
+        print('Cpu chose:', SYMBOLS[cpu])
+        print('')
+
+        if not prompt_play_again():
+            break
+
+
+if __name__ == '__main__':
+    main()
